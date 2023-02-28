@@ -1,8 +1,7 @@
-import 'package:chat_app/chats/mesages.dart';
+import 'package:chat_app/chats/messages.dart';
 import 'package:chat_app/chats/new_message.dart';
 import 'package:flutter/material.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -45,15 +44,13 @@ class _ChatScreenState extends State<ChatScreen> {
               }),
         ],
       ),
-      body: Container(
-        child: Column(
-          children: const [
-            Expanded(
-              child: Messages(),
-            ),
-            NewMessage(),
-          ],
-        ),
+      body: Column(
+        children: const [
+          Expanded(
+            child: Messages(),
+          ),
+          NewMessage(),
+        ],
       ),
     );
   }
