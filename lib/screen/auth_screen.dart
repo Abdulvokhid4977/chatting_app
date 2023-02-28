@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../widgets/auth/auth_form.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -8,47 +13,61 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  late bool _isLoading;
+  final auth = FirebaseAuth.instance;
+  @override
+  void initState() {
+    _isLoading=false;
+    super.initState();
+  }
+  void _passData(String name, String email, String password, bool isLogin,
+      BuildContext ctx) async {
+    UserCredential authResult;
+    try {
+      setState(() {
+        _isLoading=true;
+      });
+      if (isLogin) {
+        authResult = await auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } else {
+        authResult = await auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        await FirebaseFirestore.instance.collection('users')
+            .doc(authResult.user!.uid)
+            .set({'username': name, 'email': email});
+      }
+    } on PlatformException catch (error) {
+      String? message = 'Something went wrong, check your credentials';
+      if (error.message != null) {
+        message = error.message;
+      }
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(message!),
+          backgroundColor: Theme.of(ctx).colorScheme.error,
+        ),
+      );
+      setState(() {
+        _isLoading=false;
+      });
+    } catch (err) {
+      debugPrint(err.toString());
+      setState(() {
+        _isLoading=false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Center(
-        child: Card(
-          elevation: 10,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            height: height * 0.35,
-            width: width * 0.65,
-            child: Column(
-              children: [
-                Container(
-                  height: height * 0.35 * 0.15,
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10)),
-                    border: Border.all(width: 1, color: Colors.grey),
-                  ),
-                  width: double.infinity,
-                  child: const Text(
-                    'Welcome to Chat App',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.orange,
-                    ),
-                  ),
-                ),
-                const TextField(),
-              ],
-            ),
-          ),
-        ),
-      ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: AuthForm(_passData, _isLoading),
     );
   }
 }

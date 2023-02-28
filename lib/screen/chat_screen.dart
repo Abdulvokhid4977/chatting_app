@@ -1,6 +1,9 @@
+import 'package:chat_app/chats/mesages.dart';
+import 'package:chat_app/chats/new_message.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -15,24 +18,42 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat App'),
+        backgroundColor: Theme.of(context).primaryColor,
+        actions: [
+          DropdownButton(
+              icon: Icon(
+                Icons.more_vert,
+                color: Theme.of(context).primaryIconTheme.color,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: const [
+                      Icon(
+                        Icons.exit_to_app,
+                      ),
+                      Text('Logout')
+                    ],
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == 'logout') {
+                  FirebaseAuth.instance.signOut();
+                }
+              }),
+        ],
       ),
-      body: ListView.builder(
-        itemBuilder: (ctx, i) => Container(
-          padding: const EdgeInsets.all(10),
-          child: const Text('this is a dummy message'),
+      body: Container(
+        child: Column(
+          children: const [
+            Expanded(
+              child: Messages(),
+            ),
+            NewMessage(),
+          ],
         ),
-        itemCount: 10,
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          FirebaseFirestore.instance
-              .collection('chats/wYwcu8g3uP1HMQIg7jXL/messages')
-              .snapshots()
-              .listen((event) {
-           for (var element in event.docs) {print(element['text']);}
-          });
-        },
       ),
     );
   }
