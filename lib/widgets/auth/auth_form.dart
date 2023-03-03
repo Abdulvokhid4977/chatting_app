@@ -1,13 +1,16 @@
+import 'dart:io';
+
+import 'package:chat_app/pickers/user_image_picker.dart';
 import 'package:flutter/material.dart';
 
 enum AuthMode { signup, login }
 
 class AuthForm extends StatefulWidget {
-  final void Function(String email, String name, String password, bool isLogin,
+  final void Function(String email, String name, String password, File? image,bool isLogin,
       BuildContext ctx) passData;
-   final bool _isLoading;
+  final bool _isLoading;
 
-  const AuthForm(this.passData,this._isLoading, {super.key});
+  const AuthForm(this.passData, this._isLoading, {super.key});
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -20,6 +23,7 @@ class _AuthFormState extends State<AuthForm>
   String? _userEmail = '';
   String? _userPassword = '';
   late bool _isLogin;
+  File? imagePicked;
   AuthMode authMode = AuthMode.signup;
   RegExp regex =
       RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
@@ -31,7 +35,7 @@ class _AuthFormState extends State<AuthForm>
   @override
   void initState() {
     super.initState();
-    _isLogin=false;
+    _isLogin = false;
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(
@@ -49,20 +53,37 @@ class _AuthFormState extends State<AuthForm>
   void _trySubmit() {
     final isValid = _formKey.currentState?.validate();
     FocusScope.of(context).unfocus();
+    if (imagePicked == null && !(authMode == AuthMode.login)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Pick an image first'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
     if (isValid == true) {
       _formKey.currentState?.save();
 
       widget.passData(_userName!.trim(), _userEmail!.trim(),
-          _userPassword!.trim(), _isLogin, context);
+          _userPassword!.trim(),imagePicked, _isLogin, context);
     }
   }
 
   void changeAuthMode() {
     setState(() {
       authMode == AuthMode.signup
-          ? {authMode = AuthMode.login, _isLogin=true, _controller.forward()}
-          : {authMode = AuthMode.signup, _isLogin=false, _controller.reverse()};
+          ? {authMode = AuthMode.login, _isLogin = true, _controller.forward()}
+          : {
+              authMode = AuthMode.signup,
+              _isLogin = false,
+              _controller.reverse()
+            };
     });
+  }
+
+  void imagePicker(File image) {
+    imagePicked = image;
   }
 
   @override
@@ -76,16 +97,18 @@ class _AuthFormState extends State<AuthForm>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeIn,
-            height: authMode == AuthMode.signup ? 400 : 240,
+            height: authMode == AuthMode.signup ? 420 : 240,
             // height: _heightAnimation.value.height,
             constraints: BoxConstraints(
-                minHeight: authMode == AuthMode.signup ? 400 : 240),
+                minHeight: authMode == AuthMode.signup ? 420 : 240),
             width: deviceSize.width * 0.75,
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    if (authMode == AuthMode.signup)
+                      UserImagePicker(imagePicker),
                     TextFormField(
                       validator: (val) {
                         if (val!.isEmpty) {
@@ -202,12 +225,14 @@ class _AuthFormState extends State<AuthForm>
                     const SizedBox(
                       height: 12,
                     ),
-                    widget._isLoading ?const CircularProgressIndicator():
-                    ElevatedButton(
-                      onPressed: _trySubmit,
-                      child: Text(
-                          authMode == AuthMode.signup ? 'Sign Up' : 'Log in'),
-                    ),
+                    widget._isLoading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: _trySubmit,
+                            child: Text(authMode == AuthMode.signup
+                                ? 'Sign Up'
+                                : 'Log in'),
+                          ),
                     const SizedBox(
                       height: 12,
                     ),
