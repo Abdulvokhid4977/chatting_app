@@ -5,15 +5,24 @@ class MessageBubble extends StatelessWidget {
   final bool isMe;
   final Key k;
   final String username;
-  const MessageBubble(this.message, this.isMe, this.username,
+  final String imageUrl;
+  const MessageBubble(this.message, this.isMe, this.username, this.imageUrl,
       {super.key, required this.k});
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     return Row(
+
       mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
+        if(!isMe)
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(imageUrl),
+          ),
+        ),
         Container(
           decoration: BoxDecoration(
             color: isMe
@@ -33,6 +42,7 @@ class MessageBubble extends StatelessWidget {
             crossAxisAlignment:
                 isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
+
               if (!isMe)
                 Text(
                   username,
@@ -47,6 +57,13 @@ class MessageBubble extends StatelessWidget {
             ],
           ),
         ),
+        if(isMe)
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(imageUrl),
+            ),
+          ),
       ],
     );
   }

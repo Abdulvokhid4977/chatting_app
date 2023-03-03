@@ -45,11 +45,13 @@ class _AuthScreenState extends State<AuthScreen> {
             .ref()
             .child('user_images')
             .child('${authResult.user?.uid}.jpg');
-        ref.putFile(image!).then((p0) => null);
+        await ref.putFile(image!).whenComplete(() => null);
+        final url= await ref.getDownloadURL();
         await FirebaseFirestore.instance
             .collection('users')
             .doc(authResult.user!.uid)
-            .set({'username': name, 'email': email});
+            .set({'username': name, 'email': email, 'image_url': url});
+        print(url);
       }
     } on PlatformException catch (error) {
       String? message = 'Something went wrong, check your credentials';
@@ -71,6 +73,10 @@ class _AuthScreenState extends State<AuthScreen> {
         _isLoading = false;
       });
     }
+  }
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

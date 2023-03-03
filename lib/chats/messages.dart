@@ -21,6 +21,7 @@ class Messages extends StatelessWidget {
                 snapshot.data?.docs[index]['userId'] ==
                     FirebaseAuth.instance.currentUser?.uid,
                 snapshot.data?.docs[index]['username'],
+                snapshot.data?.docs[index]['user_image'],
                 k: ValueKey(snapshot.data?.docs[index].id),
 
               );

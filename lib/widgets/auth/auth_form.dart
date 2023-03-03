@@ -24,6 +24,7 @@ class _AuthFormState extends State<AuthForm>
   String? _userPassword = '';
   late bool _isLogin;
   File? imagePicked;
+
   AuthMode authMode = AuthMode.signup;
   RegExp regex =
       RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
