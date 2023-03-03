@@ -38,7 +38,8 @@ class _NewMessageState extends State<NewMessage> {
           Expanded(
               child: TextField(
                 showCursor: true,
-                textCapitalization: TextCapitalization.values.first,
+                textCapitalization: TextCapitalization.sentences,
+                keyboardType: TextInputType.text,
                 onSubmitted: (val){sendMessage();},
             controller: controller,
             decoration: const InputDecoration(hintText: 'Message', ),
